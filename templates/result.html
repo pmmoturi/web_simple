@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <div class="grid md:grid-cols-3 gap-6 mb-6">
+        <!-- Statement Summary Card -->
+        <div class="bg-white shadow-material rounded-lg p-6">
+            <h2 class="text-2xl font-semibold text-brand-primary mb-4">M-PESA Statement Summary</h2>
+            <div class="space-y-2">
+                <img src="{{ url_for('static', filename='img/mpesa_logo.png') }}" alt="M-PESA Logo" class="h-12 mb-4">
+                <p><strong>Customer Name:</strong> {{ details.user_name or 'N/A' }}</p>
+                <p><strong>Mobile Number:</strong> {{ details.user_phone_number or 'N/A' }}</p>
+                <p><strong>Email Address:</strong> {{ details.email_address or 'N/A' }}</p>
+                <p><strong>Statement Period:</strong> {{ details.period_start_date }} - {{ details.period_end_date }}</p>
+                <p><strong>Request Date:</strong> {{ details.request_date }}</p>
+            </div>
+        </div>
+
+        <!-- Monthly Fees Summary -->
+        <div class="bg-white shadow-material rounded-lg p-6">
+            <h2 class="text-2xl font-semibold text-brand-secondary mb-4">Monthly Fees Summary</h2>
+            <canvas id="monthlyFeesChart"></canvas>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="bg-white shadow-material rounded-lg p-6">
+            <h2 class="text-2xl font-semibold text-brand-secondary mb-4">Interactive Chat</h2>
+            <div x-data="chatInterface()" class="h-full flex flex-col">
+                <div id="chat-messages" class="flex-grow overflow-y-auto mb-4 space-y-2">
+                    <!-- Dynamic chat messages will be inserted here -->
+                </div>
+                <form @submit.prevent="sendMessage" class="flex">
+                    <input type="text" x-model="message" 
+                        class="flex-grow mr-2 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-secondary" 
+                        placeholder="Ask a question about your statement">
+                    <button type="submit" 
+                        class="bg-brand-secondary text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition material-ripple">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Download Buttons -->
+    <div class="flex justify-center space-x-4 mb-6">
+        <a href="{{ url_for('download_file', file_id=details.mpesa_file_id, file_format='csv') }}" 
+            class="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition material-ripple">
+            Download CSV
+        </a>
+        <a href="{{ url_for('download_file', file_id=details.mpesa_file_id, file_format='xlsx') }}" 
+            class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition material-ripple">
+            Download XLSX
+        </a>
+        <a href="{{ url_for('index') }}" 
+            class="bg-gray-500 text-white px-6 py-2 rounded-full hover:bg-gray-600 transition material-ripple">
+            Go Back
+        </a>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="bg-white shadow-material rounded-lg p-6 overflow-x-auto">
+        <h2 class="text-2xl font-semibold text-brand-primary mb-4">Transaction Records</h2>
+        <table class="w-full border-collapse">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 text-left">Receipt No</th>
+                    <th class="p-3 text-left">Completion Time</th>
+                    <th class="p-3 text-left">Details</th>
+                    <th class="p-3 text-left">Status</th>
+                    <th class="p-3 text-right">Paid In</th>
+                    <th class="p-3 text-right">Withdrawn</th>
+                    <th class="p-3 text-right">Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="p-3">{{ record[0] }}</td>
+                    <td class="p-3">{{ record[1] }}</td>
+                    <td class="p-3">{{ record[2] }}</td>
+                    <td class="p-3">{{ record[3] }}</td>
+                    <td class="p-3 text-right">{{ record[4] or '-' }}</td>
+                    <td class="p-3 text-right">{{ record[5] or '-' }}</td>
+                    <td class="p-3 text-right">{{ record[6] or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart Data
+    const monthlyFeesData = JSON.parse('{{ monthly_fees | default({}, true) | tojson | safe }}');
+    const ctx = document.getElementById('monthlyFeesChart').getContext('2d');
+
+    // Create Bar Chart
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(monthlyFeesData),
+            datasets: [
+                {
+                    label: 'Peer-to-Peer Fees',
+                    backgroundColor: '#4CAF50',
+                    data: Object.values(monthlyFeesData).map(d => d.peer_to_peer || 0),
+                },
+                {
+                    label: 'Paybill Fees',
+                    backgroundColor: '#2196F3',
+                    data: Object.values(monthlyFeesData).map(d => d.paybill || 0),
+                },
+                {
+                    label: 'Till Fees',
+                    backgroundColor: '#FF5722',
+                    data: Object.values(monthlyFeesData).map(d => d.till || 0),
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { enabled: true },
+            },
+        },
+    });
+</script>
+{% endblock %}

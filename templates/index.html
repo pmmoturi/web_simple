@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col">
+    <!-- Hero Section -->
+    <div class="bg-brand-primary text-white py-20 text-center">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">M-PESA Statement Analyzer</h1>
+            <p class="text-xl mb-8">Upload, analyze, and gain insights from your M-PESA statements effortlessly.</p>
+        </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="flex-grow container mx-auto px-4 py-12">
+        <div class="max-w-md mx-auto bg-white shadow-material rounded-lg p-8">
+            <h2 class="text-2xl font-semibold text-center mb-6">Upload M-PESA Statement</h2>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
+                        Choose PDF File
+                    </label>
+                    <input type="file" name="file" accept=".pdf" 
+                        class="block w-full text-sm text-gray-500 
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-brand-secondary file:text-white
+                        hover:file:bg-brand-primary" required>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        PDF Password
+                    </label>
+                    <input type="password" name="password" 
+                        class="shadow-sm border rounded w-full py-2 px-3 
+                        text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-brand-primary" 
+                        placeholder="Enter PDF password" required>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-brand-primary text-white font-bold py-2 px-4 rounded-full 
+                    hover:bg-green-600 transition duration-300 material-ripple">
+                    Upload Statement
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="bg-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-material transition">
+                    <span class="material-icons text-brand-primary text-5xl mb-4">cloud_upload</span>
+                    <h3 class="text-xl font-semibold mb-2">Easy Upload</h3>
+                    <p>Quick and secure upload of M-PESA statements.</p>
+                </div>
+                <div class="text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-material transition">
+                    <span class="material-icons text-brand-secondary text-5xl mb-4">chat</span>
+                    <h3 class="text-xl font-semibold mb-2">Interactive Analysis</h3>
+                    <p>Get insights using advanced AI-powered chat.</p>
+                </div>
+                <div class="text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-material transition">
+                    <span class="material-icons text-green-600 text-5xl mb-4">download</span>
+                    <h3 class="text-xl font-semibold mb-2">Download Options</h3>
+                    <p>Export data as CSV or XLSX with ease.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

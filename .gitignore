@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# React
+node_modules/
+build/
+.DS_Store
+
+# Build output
+dist/
+src/dist/
